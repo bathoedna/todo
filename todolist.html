@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasky Dashboard</title>
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #2d3748;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Auth Page Styles */
+        .auth-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .image-container {
+            width: 50%;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+        
+        .feature-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .auth-content {
+            width: 50%;
+            min-width: 400px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: white;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        a {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        
+        .message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        /* Dashboard Styles */
+        #dashboard {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: #f5f7fa;
+            z-index: 1000;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .menu-item.active {
+            background-color: #3498db;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        /* Task Board Columns */
+        .columns-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .column {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .column-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .task-count {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        /* Task Cards */
+        .task-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .task-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .tag-status {
+            background-color: #fed7d7;
+            color: #e53e3e;
+        }
+        
+        .tag-status.medium {
+            background-color: #feebcb;
+            color: #dd6b20;
+        }
+        
+        .tag-status.low {
+            background-color: #c6f6d5;
+            color: #38a169;
+        }
+        
+        .tag-time {
+            background-color: #bee3f8;
+            color: #3182ce;
+        }
+        
+        .tag-category {
+            background-color: #e9d8fd;
+            color: #805ad5;
+        }
+        
+        .task-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .task-description {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        
+        .task-progress {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .progress-bar {
+            flex-grow: 1;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #48bb78;
+            border-radius: 3px;
+        }
+        
+        .progress-fill.overdue {
+            background-color: #f56565;
+        }
+        
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .avatars {
+            display: flex;
+        }
+        
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #4299e1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: -8px;
+            border: 2px solid white;
+        }
+        
+        .avatar:nth-child(1) {
+            z-index: 3;
+        }
+        
+        .avatar:nth-child(2) {
+            z-index: 2;
+            background-color: #9f7aea;
+        }
+        
+        .avatar:nth-child(3) {
+            z-index: 1;
+            background-color: #f56565;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .action-icon {
+            color: #a0aec0;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .action-icon:hover {
+            color: #718096;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .columns-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+            }
+            
+            .image-container {
+                display: none;
+            }
+            
+            .auth-content {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Container -->
+    <div class="auth-container" id="authContainer">
+        <!-- Left side - Single image -->
+        <div class="image-container">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Featured Photo" class="feature-image">
+        </div>
+
+        <!-- Right side - Authentication content -->
+        <div class="auth-content">
+            <!-- Home Page Content -->
+            <div id="homePage">
+                <h1>Welcome to Tasky</h1>
+                <div id="authContent">
+                    <p style="text-align: center; margin-bottom: 1.5rem;">Sign up to access your task dashboard</p>
+                    <div class="auth-buttons">
+                        <button onclick="showPage('signupPage')">Sign Up</button>
+                        <button onclick="showPage('signinPage')">Sign In</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sign Up Page Content -->
+            <div class="hidden" id="signupPage">
+                <h1>Create Account</h1>
+                <form id="signupForm">
+                    <div class="form-group">
+                        <label for="name">Full Name:</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password:</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+                    <button type="submit">Sign Up</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">Already have an account? <a href="#" onclick="showPage('signinPage')">Sign In</a></p>
+                <div id="signupMessage" class="message"></div>
+            </div>
+
+            <!-- Sign In Page Content -->
+            <div class="hidden" id="signinPage">
+                <h1>Welcome Back</h1>
+                <form id="signinForm">
+                    <div class="form-group">
+                        <label for="signinEmail">Email:</label>
+                        <input type="email" id="signinEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signinPassword">Password:</label>
+                        <input type="password" id="signinPassword" required>
+                    </div>
+                    <button type="submit">Sign In</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">Don't have an account? <a href="#" onclick="showPage('signupPage')">Sign Up</a></p>
+                <div id="signinMessage" class="message"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard (hidden by default) -->
+    <div id="dashboard" class="hidden">
+        <div class="dashboard-container">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h2>Tasky</h2>
+                </div>
+                <div class="sidebar-menu">
+                    <div class="menu-item active" onclick="showDashboardSection('taskboard')">
+                        <i>📋</i> Task Board
+                    </div>
+                    <div class="menu-item" onclick="showDashboardSection('todo')">
+                        <i>✅</i> Todo List
+                    </div>
+                    <div class="menu-item" onclick="showDashboardSection('payment')">
+                        <i>💰</i> Payments
+                    </div>
+                    <div class="menu-item" onclick="showDashboardSection('staff')">
+                        <i>👥</i> Staff
+                    </div>
+                    <div class="menu-item" onclick="logout()">
+                        <i>🚪</i> Logout
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="dashboard-header">
+                    <h2 id="dashboard-title">Task Board</h2>
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <span id="userNameDisplay">User</span>
+                    </div>
+                </div>
+
+                <!-- Task Board Section -->
+                <div class="dashboard-section" id="taskboard-section">
+                    <div class="columns-container">
+                        <!-- In Progress Column -->
+                        <div class="column">
+                            <div class="column-header">
+                                <span class="column-title">In Progress</span>
+                                <span class="task-count">2</span>
+                            </div>
+                            
+                            <!-- Task Card 1 -->
+                            <div class="task-card">
+                                <div class="task-tags">
+                                    <span class="tag tag-status">High</span>
+                                    <span class="tag tag-time">6:00 PM</span>
+                                    <span class="tag tag-category">UX Design</span>
+                                </div>
+                                <h3 class="task-title">User Flow</h3>
+                                <p class="task-description">Designing a dashboard involves creating a visual interface that displays information in an organized manner.</p>
+                                <div class="task-progress">
+                                    <span>0/3</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 30%"></div>
+                                    </div>
+                                    <span>30%</span>
+                                </div>
+                                <div class="task-footer">
+                                    <div class="avatars">
+                                        <div class="avatar">JS</div>
+                                        <div class="avatar">AD</div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <span class="action-icon">👁️</span>
+                                        <span class="action-icon">✏️</span>
+                                        <span class="action-icon">🗑️</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Task Card 2 -->
+                            <div class="task-card">
+                                <div class="task-tags">
+                                    <span class="tag tag-status medium">Medium</span>
+                                    <span class="tag tag-time">3:30 PM</span>
+                                    <span class="tag tag-category">Development</span>
+                                </div>
+                                <h3 class="task-title">API Integration</h3>
+                                <p class="task-description">Connect frontend components with backend services to enable data exchange.</p>
+                                <div class="task-progress">
+                                    <span>1/4</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 25%"></div>
+                                    </div>
+                                    <span>25%</span>
+                                </div>
+                                <div class="task-footer">
+                                    <div class="avatars">
+                                        <div class="avatar">MB</div>
+                                        <div class="avatar">TS</div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <span class="action-icon">👁️</span>
+                                        <span class="action-icon">✏️</span>
+                                        <span class="action-icon">🗑️</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Completed Tasks Column -->
+                        <div class="column">
+                            <div class="column-header">
+                                <span class="column-title">Completed Task</span>
+                                <span class="task-count">3</span>
+                            </div>
+                            
+                            <!-- Task Card 1 -->
+                            <div class="task-card">
+                                <div class="task-tags">
+                                    <span class="tag tag-status low">Low</span>
+                                    <span class="tag tag-time">11:00 AM</span>
+                                    <span class="tag tag-category">UI Design</span>
+                                </div>
+                                <h3 class="task-title">Website Design</h3>
+                                <p class="task-description">Designing a Website involves creating a visual interface that is both appealing and functional.</p>
+                                <div class="task-progress">
+                                    <span>3/3</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 100%"></div>
+                                    </div>
+                                    <span>100%</span>
+                                </div>
+                                <div class="task-footer">
+                                    <div class="avatars">
+                                        <div class="avatar">AD</div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <span class="action-icon">👁️</span>
+                                        <span class="action-icon">✏️</span>
+                                        <span class="action-icon">🗑️</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Task Card 2 -->
+                            <div class="task-card">
+                                <div class="task-tags">
+                                    <span class="tag tag-status medium">Medium</span>
+                                    <span class="tag tag-time">2:00 PM</span>
+                                    <span class="tag tag-category">Testing</span>
+                                </div>
+                                <h3 class="task-title">Bug Fixes</h3>
+                                <p class="task-description">Resolve reported issues and improve application stability.</p>
+                                <div class="task-progress">
+                                    <span>5/5</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 100%"></div>
+                                    </div>
+                                    <span>100%</span>
+                                </div>
+                                <div class="task-footer">
+                                    <div class="avatars">
+                                        <div class="avatar">TS</div>
+                                        <div class="avatar">JS</div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <span class="action-icon">👁️</span>
+                                        <span class="action-icon">✏️</span>
+                                        <span class="action-icon">🗑️</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Over-Due Column -->
+                        <div class="column">
+                            <div class="column-header">
+                                <span class="column-title">Over-Due</span>
+                                <span class="task-count">1</span>
+                            </div>
+                            
+                            <!-- Task Card 1 -->
+                            <div class="task-card">
+                                <div class="task-tags">
+                                    <span class="tag tag-status">High</span>
+                                    <span class="tag tag-time">9:00 AM</span>
+                                    <span class="tag tag-category">Documentation</span>
+                                </div>
+                                <h3 class="task-title">User Manual</h3>
+                                <p class="task-description">Create comprehensive documentation for end-users explaining all features.</p>
+                                <div class="task-progress">
+                                    <span>0/2</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill overdue" style="width: 0%"></div>
+                                    </div>
+                                    <span>0%</span>
+                                </div>
+                                <div class="task-footer">
+                                    <div class="avatars">
+                                        <div class="avatar">MB</div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <span class="action-icon">👁️</span>
+                                        <span class="action-icon">✏️</span>
+                                        <span class="action-icon">🗑️</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Task Card 2 -->
+                            <div class="task-card">
+                                <div class="task-tags">
+                                    <span class="tag tag-status medium">Medium</span>
+                                    <span class="tag tag-time">4:45 PM</span>
+                                    <span class="tag tag-category">Development</span>
+                                </div>
+                                <h3 class="task-title">Database Optimization</h3>
+                                <p class="task-description">Improve query performance and reduce response times.</p>
+                                <div class="task-progress">
+                                    <span>1/4</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill overdue" style="width: 25%"></div>
+                                    </div>
+                                    <span>25%</span>
+                                </div>
+                                <div class="task-footer">
+                                    <div class="avatars">
+                                        <div class="avatar">JS</div>
+                                        <div class="avatar">AD</div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <span class="action-icon">👁️</span>
+                                        <span class="action-icon">✏️</span>
+                                        <span class="action-icon">🗑️</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Todo Section -->
+                <div class="dashboard-section hidden" id="todo-section">
+                    <h3 class="section-title">My Tasks</h3>
+                    <div class="todo-container" id="todoList">
+                        <!-- Todo items will be added here -->
+                    </div>
+                    <div class="add-todo">
+                        <input type="text" id="newTodoInput" placeholder="Add a new task...">
+                        <button onclick="addTodo()">Add</button>
+                    </div>
+                </div>
+
+                <!-- Payment Section -->
+                <div class="dashboard-section hidden" id="payment-section">
+                    <h3 class="section-title">Payments</h3>
+                    <div class="payment-cards">
+                        <div class="payment-card">
+                            <div class="payment-title">Total Revenue</div>
+                            <div class="payment-amount">$12,345</div>
+                        </div>
+                        <div class="payment-card">
+                            <div class="payment-title">Pending Payments</div>
+                            <div class="payment-amount">$3,210</div>
+                        </div>
+                        <div class="payment-card">
+                            <div class="payment-title">Completed Payments</div>
+                            <div class="payment-amount">$9,135</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Staff Section -->
+                <div class="dashboard-section hidden" id="staff-section">
+                    <h3 class="section-title">Staff Members</h3>
+                    <div class="staff-list">
+                        <div class="staff-card">
+                            <div class="staff-avatar">JS</div>
+                            <div class="staff-info">
+                                <div class="staff-name">John Smith</div>
+                                <div class="staff-role">Project Manager</div>
+                            </div>
+                        </div>
+                        <div class="staff-card">
+                            <div class="staff-avatar">AD</div>
+                            <div class="staff-info">
+                                <div class="staff-name">Alice Davis</div>
+                                <div class="staff-role">Developer</div>
+                            </div>
+                        </div>
+                        <div class="staff-card">
+                            <div class="staff-avatar">MB</div>
+                            <div class="staff-info">
+                                <div class="staff-name">Michael Brown</div>
+                                <div class="staff-role">Designer</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize users array in localStorage if it doesn't exist
+        if (!localStorage.getItem('users')) {
+            localStorage.setItem('users', JSON.stringify([]));
+        }
+
+        // Initialize todos array in localStorage if it doesn't exist
+        if (!localStorage.getItem('todos')) {
+            localStorage.setItem('todos', JSON.stringify([]));
+        }
+
+        // Show the specified page and hide others
+        function showPage(pageId) {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('signupPage').classList.add('hidden');
+            document.getElementById('signinPage').classList.add('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        // Show dashboard section
+        function showDashboardSection(section) {
+            // Hide all sections
+            document.getElementById('taskboard-section').classList.add('hidden');
+            document.getElementById('todo-section').classList.add('hidden');
+            document.getElementById('payment-section').classList.add('hidden');
+            document.getElementById('staff-section').classList.add('hidden');
+            
+            // Remove active class from all menu items
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section and set active menu item
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            document.querySelector(`.menu-item[onclick="showDashboardSection('${section}')"]`).classList.add('active');
+            
+            // Update dashboard title
+            const titles = {
+                'taskboard': 'Task Board',
+                'todo': 'Todo List',
+                'payment': 'Payments',
+                'staff': 'Staff'
+            };
+            document.getElementById('dashboard-title').textContent = titles[section];
+        }
+
+        // Check authentication status
+        function checkAuthStatus() {
+            const currentUser = getCurrentUser();
+            
+            if (currentUser) {
+                // Show dashboard
+                document.getElementById('dashboard').classList.remove('hidden');
+                // Hide auth container
+                document.getElementById('authContainer').classList.add('hidden');
+                
+                // Update user info
+                document.getElementById('userNameDisplay').textContent = currentUser.name;
+                document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+                
+                // Load todos
+                loadTodos();
+                return true;
+            }
+            return false;
+        }
+
+        // Get current user from localStorage
+        function getCurrentUser() {
+            return JSON.parse(localStorage.getItem('currentUser'));
+        }
+
+        // Sign Up Form Handling
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const messageDiv = document.getElementById('signupMessage');
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                messageDiv.textContent = 'Passwords do not match!';
+                messageDiv.className = 'message error';
+                return;
+            }
+            
+            // Get existing users
+            const users = JSON.parse(localStorage.getItem('users'));
+            
+            // Check if user already exists
+            if (users.some(user => user.email === email)) {
+                messageDiv.textContent = 'User with this email already exists!';
+                messageDiv.className = 'message error';
+                return;
+            }
+            
+            // Add new user
+            users.push({
+                name,
+                email,
+                password // Note: In a real app, you should NEVER store plain text passwords
+            });
+            
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            messageDiv.textContent = 'Sign up successful! Please sign in.';
+            messageDiv.className = 'message success';
+            
+            // Clear form
+            document.getElementById('signupForm').reset();
+            
+            // Show sign in page after delay
+            setTimeout(() => {
+                showPage('signinPage');
+            }, 1500);
+        });
+
+        // Sign In Form Handling
+        document.getElementById('signinForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('signinEmail').value;
+            const password = document.getElementById('signinPassword').value;
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const user = users.find(user => user.email === email && user.password === password);
+            
+            const messageDiv = document.getElementById('signinMessage');
+            
+            if (user) {
+                // Store current user in localStorage
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                messageDiv.textContent = 'Sign in successful! Redirecting...';
+                messageDiv.className = 'message success';
+                
+                // Clear form
+                document.getElementById('signinForm').reset();
+                
+                // Show dashboard after delay
+                setTimeout(() => {
+                    checkAuthStatus();
+                }, 1000);
+            } else {
+                messageDiv.textContent = 'Invalid email or password!';
+                messageDiv.className = 'message error';
+            }
+        });
+
+        // Todo List Functions
+        function loadTodos() {
+            const todos = JSON.parse(localStorage.getItem('todos')) || [];
+            const todoList = document.getElementById('todoList');
+            todoList.innerHTML = '';
+            
+            todos.forEach((todo, index) => {
+                const todoItem = document.createElement('div');
+                todoItem.className = `todo-item ${todo.completed ? 'todo-completed' : ''}`;
+                todoItem.innerHTML = `
+                    <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} 
+                        onchange="toggleTodo(${index})">
+                    <div class="todo-text">${todo.text}</div>
+                    <div class="todo-actions">
+                        <button onclick="deleteTodo(${index})">Delete</button>
+                    </div>
+                `;
+                todoList.appendChild(todoItem);
+            });
+        }
+
+        function addTodo() {
+            const input = document.getElementById('newTodoInput');
+            const text = input.value.trim();
+            
+            if (text) {
+                const todos = JSON.parse(localStorage.getItem('todos')) || [];
+                todos.push({ text, completed: false });
+                localStorage.setItem('todos', JSON.stringify(todos));
+                input.value = '';
+                loadTodos();
+            }
+        }
+
+        function toggleTodo(index) {
+            const todos = JSON.parse(localStorage.getItem('todos'));
+            todos[index].completed = !todos[index].completed;
+            localStorage.setItem('todos', JSON.stringify(todos));
+            loadTodos();
+        }
+
+        function deleteTodo(index) {
+            const todos = JSON.parse(localStorage.getItem('todos'));
+            todos.splice(index, 1);
+            localStorage.setItem('todos', JSON.stringify(todos));
+            loadTodos();
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('currentUser');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('authContainer').classList.remove('hidden');
+            showPage('homePage');
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show home page by default
+            showPage('homePage');
+            checkAuthStatus();
+        });
+    </script>
+</body>
+</html>
